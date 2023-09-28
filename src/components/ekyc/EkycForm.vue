@@ -9,7 +9,7 @@
       <template #footer>
         <a-button key="back" @click="handleCancelPopup">Đóng</a-button>
         <a-button key="submit" type="primary" :loading="loading" @click="handleOk" v-if="is_show_capture"><CameraOutlined /> Chụp ảnh</a-button>
-        <a-button key="waiting" type="default" :loading="loading" @click="handleOk" v-if="!is_show_capture">Đang xử lý...</a-button>
+        <a-button key="waiting" type="default" :loading="loading" @click="handleOk" v-if="!is_show_capture">Đang xử lý.... sw</a-button>
       </template>
         <Suspense>
           <template #default>

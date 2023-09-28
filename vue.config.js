@@ -9,7 +9,7 @@ module.exports = defineConfig({
     https: true,
     proxy: {
       '^/api': {
-        target: 'apiurl',
+        target: 'http://nhanhoa.com',
         ws: true,
         changeOrigin: true,
         pathRewrite: {
