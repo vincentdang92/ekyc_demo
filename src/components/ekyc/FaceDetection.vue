@@ -84,15 +84,17 @@ export default defineComponent({
         const camera = ref(null);
         const canvas = ref(null);
         const image = ref('');  
-
- 
+        var nh_url = 'https://nhbk.nhanhoa.com/templates/ekyc_v2';
+        if(process.env.NODE_ENV !== "production"){
+            nh_url = '';
+        }
         const handleGetUserMedia = (async () => {
 
             randomActionSequenceRef.value = getActionsSequence();
         
             faceMesh = new FaceMesh({
                 locateFile: (file) => {
-                    return "/component/face_mesh/" + file;
+                    return nh_url+"/component/face_mesh/" + file;
                 },
             });
             faceMesh.setOptions({
@@ -103,6 +105,9 @@ export default defineComponent({
 
              // Start an interval for face detecting
             const timer = setIntervalAsync(async () => {
+                if(camera.value == null){
+                    return false;
+                }
                 // Setting up callback for face detection for the first time
                 if (!setUpFaceDetectionCallBack.value) {
                     console.log("Start liveness check");

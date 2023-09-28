@@ -226,10 +226,11 @@ export default {
 
 
     faceVerificationChecking(faceVerificationData) {
-        if(faceVerificationData.error){
-          return { success: false, message: faceVerificationData.error};
-        }
-        return { success: true, message: "OK." };
+        console.log(faceVerificationData, "faceVerificationData"); return false;
+        // if(faceVerificationData.error){
+        //   return { success: false, message: faceVerificationData.error};
+        // }
+        // return { success: true, message: "OK." };
     }
 
 

@@ -8,18 +8,22 @@
             <div class="video-box">
                 <a-alert  type="success"  v-if="!loadingVideo" v-show="!isPhotoTaken" >
                     <template #message>
-                        Đưa thẳng thẻ của bạn vào trước khung hình và duy chuyển nhẹ để đạt độ nét tối đa.
+                        Đưa thẳng thẻ của bạn vào trước khung hình và di chuyển nhẹ để đạt độ nét tối đa.
                     </template>
                 </a-alert>
                 <video style=" max-width: 100%;" v-show="!isPhotoTaken" ref="camera" webkit-playsinline playsinline autoplay :onPlay="handleGetUserMedia"></video>
-                <tnButton class="taken-photo" @click="takePhoto" v-if="onDetect">
-                    <unicon name="camera" :shape="`circle`" type="dashed" size="large" />
-                </tnButton>
+                
                 <div class="crop-image"  v-if="!loadingVideo" v-show="!isPhotoTaken"></div>
                 <canvas id="photoTaken" ref="canvas" style=" max-width: 100%;  display:none" :width="450" :height="337.5"></canvas>
             </div>
             
         </VideoBox>
+        <div style="text-align:right;">
+            <a class="taken-photo ant-btn ant-btn-primary" @click="takePhoto" v-if="onDetect" style="margin-top:10px;">
+                Chụp ảnh
+            </a>
+            
+        </div>
     </div>
 </template>
 <script>
@@ -32,6 +36,7 @@ import { cropAndNormalize } from "@/utility/ekyc/image-util";
 import {  calculateSharpness,   } from "@/utility/ekyc/image-util";
  import { VideoBox } from './style.js'
  import delay from "@/utility/ekyc/delay";
+import { message } from 'ant-design-vue';
 
  
 
@@ -57,10 +62,12 @@ export default defineComponent({
         const isDetected = ref(false);
         const onDetect = ref(false); //test
         // const cv = ref(null);
-
- 
+        var nh_url = 'https://nhbk.nhanhoa.com/templates/ekyc_v2';
+        if(process.env.NODE_ENV !== "production"){
+            nh_url = '';
+        }
         const handleGetUserMedia = (async () => {
-            const yolov5 = await tf.loadGraphModel(`/component/yolov5n_web_model/model.json`)
+            const yolov5 = await tf.loadGraphModel(`${nh_url}/component/yolov5n_web_model/model.json`)
             const dummyInput = tf.ones(yolov5.inputs[0].shape);
             await yolov5.executeAsync(dummyInput).then((warmupResult) => {
                 tf.dispose(warmupResult);
@@ -99,7 +106,10 @@ export default defineComponent({
             })
         })
         const takePhoto = (async() => {
-            console.log('TakePhoto')
+            console.log('TakePhoto');
+            if(canvas.value == null){
+                message.error("Không tìm thấy ảnh!"); return false;
+            }
             const width = camera.value ? camera.value.videoWidth : 800;
             const height = camera.value ? camera.value.videoHeight : 600;
             canvas.value.width = width;
@@ -116,6 +126,7 @@ export default defineComponent({
 
             isPhotoTaken.value = true;
             stopCameraStream();
+            await delay(3000);
         })
 
         const stopCameraStream = () => {
@@ -129,6 +140,9 @@ export default defineComponent({
         }
 
         const autoDetectCard = (async(model) => {
+            if(canvas.value == null){
+                return false;
+            }
             const width = camera.value ? camera.value.videoWidth : 800;
             const height = camera.value ? camera.value.videoHeight : 600;
             const cropWidth = (width * (isMobile ? 95 : 75)) / 100;
@@ -178,7 +192,7 @@ export default defineComponent({
                             .getImageData(0, 0, normCanvas.width, normCanvas.height)
                         );
                         console.log('Độ nét ảnh',sharpness.value);
-                        if (sharpness.value >= 10) {
+                        if (sharpness.value >= 2) {
                             isDetected.value = true;
                         }
                     }
@@ -192,7 +206,8 @@ export default defineComponent({
             if (!isDetected.value && !isPhotoTaken.value) {
                 requestAnimationFrame(() => autoDetectCard(model));
             } else {
-                takePhoto();
+                //takePhoto();
+                
                 // isPhotoTaken.value = true;
                 // let resizedImageData = await cropImage(
                 //     canvas.value.toDataURL("image/jpeg", 0.95),
