@@ -2,7 +2,7 @@
 <template>
   <EkycForm>
     <template v-if="currentStep === 'ekycHelp'" >
-      <help-ekyc @comfirm="handleBeginProcess" />
+      <help-ekyc @comfirm="handleBeginProcess" @restartform="handleStartProcess" />
     </template>
     <template v-if="currentStep === 'cardFront' && !isUpload"  >
       <a-modal   :visible="visibleModal" title="Hình CMND/CCCD mặt trước">
@@ -178,7 +178,7 @@ export default defineComponent({
 
     const cardimageFront = ref('')
     const cardimageBack = ref('')
-    const currentStep = ref('cardFront')
+    const currentStep = ref('face')
     const visibleModal = ref(true)
     const open = ref(true)
     const requestId = 'NH' +Date.now().toString();
@@ -212,7 +212,7 @@ export default defineComponent({
       isUpload.value = true
       open.value = false
       visibleModal.value = false
-      currentStep.value = "cardFront";
+      currentStep.value = "face";
     }
     const delayStep = (async() => {
       await delay(5000);
@@ -364,7 +364,12 @@ export default defineComponent({
     const handleBeginProcess = () => {
       currentStep.value = "cardFront";
     }
-
+    //press cancle help form
+    const handleStartProcess = () => {
+      //currentStep.value = "ekycHelp";
+      console.log(handleStartProcess);
+      reAction();
+    }
     const handleCancelPopup = (async() => {
         isUpload.value = true
         open.value = false
@@ -567,6 +572,7 @@ export default defineComponent({
       handlecardFront,
       handleBackCard,
       handleFaceId,
+      handleStartProcess,
       cardimageFront,
       cardimageBack,
       currentStep,

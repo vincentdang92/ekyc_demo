@@ -7,8 +7,10 @@
             v-model:visible="visible"  
             title="Hướng dẫn chụp mặt trước CMT" 
             @ok="handleOk" 
+            @cancel="handleCancleHelp"
             :maskClosable="false" 
-            okText="Đã hiểu"
+            okText="Đã hiểu" 
+            cancelText="Đóng"
             :centered="true"
         >
                 <a-list size="large" :data-source="data">
@@ -35,7 +37,7 @@ const data = [
 
 
 export default defineComponent({
-    emits: ['comfirm'],
+    emits: ['comfirm', 'restartform'],
   setup(props, {emit}) {
     const visible = ref(true);
     const handleOk = () => {
@@ -43,12 +45,15 @@ export default defineComponent({
       emit('comfirm', true);
     console.log(props)
     };
-
+    const handleCancleHelp = () =>{
+      emit('restartform', true);
+    }
    
 
     return {
       visible,
       handleOk,
+      handleCancleHelp,
       data
     };
   },
