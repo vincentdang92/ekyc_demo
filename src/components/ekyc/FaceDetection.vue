@@ -84,7 +84,7 @@ export default defineComponent({
         const camera = ref(null);
         const canvas = ref(null);
         const image = ref('');  
-        var nh_url = 'https://nhbk.nhanhoa.com/templates/ekyc_v2';
+        var nh_url = 'https://customer.nhanhoa.com/templates/ekyc_v2';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }
@@ -143,6 +143,7 @@ export default defineComponent({
                         // If first step, take the picture
                         if (stepRef.value === 0) {
                             const canvas = results.image;
+                            if(canvas === null) return false;
                             const { x1, x2, y1, y2 } = getBoundingBox(results);
                             // Check if the face is fully presented
                             if (

@@ -41,23 +41,23 @@
       </a-modal>
     </template>
 
-      <a-row>
+      <a-row >
         <a-col :span="8">
           <a-timeline>
-            <a-timeline-item>
+            <a-timeline-item v-if="currentStep === 'cardFront' ">
               <template #dot v-if="currentStep === 'cardFront' ">
                 <a-spin />
               </template>
               Kiểm tra ảnh mặt trước
             </a-timeline-item>
-            <a-timeline-item>
+            <a-timeline-item v-if="currentStep === 'cardBack' ">
               <template #dot v-if="currentStep === 'cardBack' ">
                 <a-spin />
               </template>
               Kiểm tra ảnh mặt sau
             </a-timeline-item>
-            <a-timeline-item>
-              <template #dot v-if="currentStep === 'face' ">
+            <a-timeline-item  v-if="currentStep === 'beginCheckFaceId' ">
+              <template #dot v-if="currentStep === 'beginCheckFaceId' ">
                 <a-spin />
               </template>
               Kiểm tra sinh trắc
@@ -67,8 +67,11 @@
         </a-col>
 
         <a-col :span="16">
-          
+          <!-- eslint-disable -->
           <a-row>
+			<a-col :span="6" v-if="currentStep === 'beginCheckFaceId'">
+              	<a-button  type="primary" outlined block @click="handleOpenFaceId">Xác thực khuôn mặt</a-button>
+            </a-col>
             <a-col :span="24" v-if="currentStep === 'cardFront'">
               <a-card title="Ảnh CCCD mặt trước">
                 <img :src="cardimageFront" style="width: 100%" />
@@ -178,7 +181,7 @@ export default defineComponent({
 
     const cardimageFront = ref('')
     const cardimageBack = ref('')
-    const currentStep = ref('face')
+    const currentStep = ref('beginCheckFaceId')
     const visibleModal = ref(true)
     const open = ref(true)
     const requestId = 'NH' +Date.now().toString();
@@ -209,10 +212,10 @@ export default defineComponent({
       localStorage.setItem("nh_img_front", '');
       localStorage.setItem("nh_img_back", '');
       localStorage.setItem("nh_img_faceid", '');
-      isUpload.value = true
+      isUpload.value = false
       open.value = false
       visibleModal.value = false
-      currentStep.value = "face";
+      currentStep.value = "beginCheckFaceId";
     }
     const delayStep = (async() => {
       await delay(5000);
@@ -310,21 +313,19 @@ export default defineComponent({
     }
 
     const handleFaceId = (faceImageRef) => {
-      //console.log(faceImageRef);
-      let data_front = localStorage.getItem("nh_img_front");
-      let data_back = localStorage.getItem("nh_img_back");
+      console.log(faceImageRef);
       localStorage.setItem("nh_img_faceid", faceImageRef);
-      if(data_front && data_back && faceImageRef){
+      if(faceImageRef){
         isDetectingData.value = true;
         visibleModal.value = false;
         //message.info('Chuan bi upload ekyc');
         
-        do_upload_ekyc(data_front, data_back, faceImageRef);
+        //do_upload_ekyc(data_front, data_back, faceImageRef);
       }
       else{
-        currentStep.value = "faield";
+        currentStep.value = "beginCheckFaceId";
         resetForm();
-        message.error('Missing eKYC data...');
+        message.error('Bạn đã hủy xác thực khuôn mặt!');
       }
       
       // isDetectingData.value = true;
@@ -360,22 +361,30 @@ export default defineComponent({
       isUpload.value = false;
       resetForm()
     }
-
+	//new
+	const handleOpenFaceId = () => {
+		currentStep.value = "face";
+		isUpload.value = false;
+		visibleModal.value = true;
+	}
     const handleBeginProcess = () => {
-      currentStep.value = "cardFront";
+      currentStep.value = "face";
     }
     //press cancle help form
     const handleStartProcess = () => {
       //currentStep.value = "ekycHelp";
-      console.log(handleStartProcess);
+      console.log('normCanvas');
       reAction();
     }
     const handleCancelPopup = (async() => {
-        isUpload.value = true
+		await delay(1000);
+		console.log('handleCancelPopup');
+		currentStep.value = "beginCheckFaceId";
+        isUpload.value = false
         open.value = false
         visibleModal.value = false
-        await delay(1000);
-        currentStep.value = "cardFront";
+        
+        
     })
 
 
@@ -573,6 +582,7 @@ export default defineComponent({
       handleBackCard,
       handleFaceId,
       handleStartProcess,
+	  handleOpenFaceId,
       cardimageFront,
       cardimageBack,
       currentStep,

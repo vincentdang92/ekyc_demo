@@ -62,7 +62,7 @@ export default defineComponent({
         const isDetected = ref(false);
         const onDetect = ref(false); //test
         // const cv = ref(null);
-        var nh_url = 'https://nhbk.nhanhoa.com/templates/ekyc_v2';
+        var nh_url = 'https://customer.nhanhoa.com/templates/ekyc_v2';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }
@@ -185,6 +185,7 @@ export default defineComponent({
                         y2 <= (height + cropHeight) / 2
                     ) {
                         const normCanvas = cropAndNormalize(canvas.value, width, x1, y1, x2, y2);
+                        if(normCanvas) return false;
                         sharpness.value = calculateSharpness(
                         window.cv,
                         normCanvas
