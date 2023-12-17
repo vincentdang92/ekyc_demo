@@ -42,7 +42,7 @@
     </template>
 
       <a-row >
-        <a-col :span="8">
+        <a-col :span="8" v-if="false">
           <a-timeline>
             <a-timeline-item v-if="currentStep === 'cardFront' ">
               <template #dot v-if="currentStep === 'cardFront' ">
@@ -56,7 +56,7 @@
               </template>
               Kiểm tra ảnh mặt sau
             </a-timeline-item>
-            <a-timeline-item  v-if="currentStep === 'beginCheckFaceId' ">
+            <a-timeline-item  v-if="false">
               <template #dot v-if="currentStep === 'beginCheckFaceId' ">
                 <a-spin />
               </template>
@@ -66,11 +66,11 @@
           </a-timeline>
         </a-col>
 
-        <a-col :span="16">
+        <a-col :span="24">
           <!-- eslint-disable -->
           <a-row>
-			<a-col :span="6" v-if="currentStep === 'beginCheckFaceId'">
-              	<a-button  type="primary" outlined block @click="handleOpenFaceId">Xác thực khuôn mặt</a-button>
+			<a-col :span="24" v-if="currentStep === 'beginCheckFaceId'">
+              	<a-button class="btn-custom-kyc"  type="primary" outlined block @click="handleOpenFaceId">Xác thực khuôn mặt</a-button>
             </a-col>
             <a-col :span="24" v-if="currentStep === 'cardFront'">
               <a-card title="Ảnh CCCD mặt trước">
@@ -109,12 +109,13 @@
                 </a-card>
             </a-col>
             <a-col  :span="24" v-if="currentStep === 'face'" >
-              <a-card title="Xác thực khuôn mặt">
+              <a-card :title="cardFaceIdTitle">
                 <a-row :gutter="[25,25]">
                   <a-col :span="12"> <img :src="cardimageFront" style="width: 100%" /></a-col>
                   <a-col :span="12"> <img :src="cardimageBack" style="width: 100%" /></a-col>
                 </a-row>
-                  <a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" />
+                  <!--a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" / -->
+				  
                 </a-card>
                 
             </a-col>
@@ -191,7 +192,7 @@ export default defineComponent({
     const isUpload = ref(true);
     //anhdq
     const is_show_capture = ref(false);
-
+	const cardFaceIdTitle = ref('Xác thực khuôn mặt');
     const resetForm = () => {
       cardimageFront.value = '';
       cardimageBack.value = '';
@@ -318,9 +319,8 @@ export default defineComponent({
       if(faceImageRef){
         isDetectingData.value = true;
         visibleModal.value = false;
-        //message.info('Chuan bi upload ekyc');
-        
-        //do_upload_ekyc(data_front, data_back, faceImageRef);
+		cardFaceIdTitle.value = "Xác thực khuôn mặt thành công!";
+        message.info('Xác thực khuôn mặt thành công!');
       }
       else{
         currentStep.value = "beginCheckFaceId";
@@ -386,7 +386,11 @@ export default defineComponent({
         
         
     })
-
+	const handleCloseModalKyc = () => {
+		console.log("handleCloseModalKyc");
+		message.info('Xác thực khuôn mặt hoàn tất!');
+		//document.getElementById("close_kyc_modal_2").click();
+	}
 
 
     // const callOcrRecognitionAPI = (imageData) => {
@@ -583,6 +587,7 @@ export default defineComponent({
       handleFaceId,
       handleStartProcess,
 	  handleOpenFaceId,
+	  handleCloseModalKyc,
       cardimageFront,
       cardimageBack,
       currentStep,
@@ -595,7 +600,8 @@ export default defineComponent({
       beforeUploadBackCard,
       isUpload,
       isMobile,
-      reAction
+      reAction,
+	  cardFaceIdTitle
     }
   }
 });

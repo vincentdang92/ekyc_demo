@@ -40,7 +40,7 @@ export default defineComponent({
     props: {
         open: propTypes.boolean
     },
-    emits: ['DataImage'],
+    emits: ['DataImage','closemodalkyc'],
 
     setup(props, {emit}) { 
 
@@ -84,7 +84,7 @@ export default defineComponent({
         const camera = ref(null);
         const canvas = ref(null);
         const image = ref('');  
-        var nh_url = 'https://customer.nhanhoa.com/templates/ekyc_v2';
+        var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }
@@ -167,9 +167,11 @@ export default defineComponent({
                             stepRef.value += 1;
                             } else {
                             confirmAudio.play();
-                            console.log("Stop liveness check end step");
+                            console.log("Stop liveness check end step 1");
                             stopCameraStream();
                             isPhotoTaken.value = true;
+                            //close modal ekyc
+                            emit("closemodalkyc", true);
                             clearIntervalAsync(timer);
                             }
                         }
@@ -195,7 +197,7 @@ export default defineComponent({
                     await faceMesh.send({ image:  camera.value });
                 } else {
                 
-                    console.log("Stop liveness check");
+                    console.log("Stop liveness check 2");
                     clearIntervalAsync(timer);
                     
                 }
