@@ -137,7 +137,32 @@ function rightEyeRatio(results) {
   const verticalDistance = eucDistance(top, bottom);
   return horizontalDistance / verticalDistance;
 }
+//detect face fit ellipse custom
 
+export function checkFaceFitsEllipse(faceLandmarks, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY) {
+	// Key facial landmarks indices, for example, using face-api.js or MediaPipe FaceMesh
+	const keyLandmarkIndices = [10, 151, 152, 234, 454, 13, 1]; // Example points: nose, eyes, mouth, chin
+
+	// Loop through the key face landmarks to check if they fit within the ellipse
+	for (let i = 0; i < keyLandmarkIndices.length; i++) {
+			const index = keyLandmarkIndices[i];
+			const x = faceLandmarks[index].x * 600 - 50;
+			const y = faceLandmarks[index].y * 400 - 50;
+
+			// Apply the ellipse fit formula
+			const isInsideEllipse = (
+				Math.pow((x - ellipseCenterX), 2) / Math.pow(ellipseRadiusX, 2) +
+        Math.pow((y - ellipseCenterY), 2) / Math.pow(ellipseRadiusY, 2)
+			)
+			return isInsideEllipse;
+			
+	}
+
+	// All key landmarks are inside the ellipse
+	return true;
+}
+
+//detect close eyes
 function detectClosedEye(results) {
   return (leftEyeRatio(results) + rightEyeRatio(results)) / 2 >= 7;
 }
@@ -146,6 +171,7 @@ function detectClosedEye(results) {
 export function faceLiveNessCheck(results, action) {
   if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
     const { yaw, pitch } = calculateFaceAngle(results);
+    //console.log(yaw, 'góc mặt');
     switch (action) {
       case "forward":
         if (yaw >= -10 && yaw <= 10 && pitch >= -7 && pitch <= 7) {
@@ -177,6 +203,7 @@ export function faceLiveNessCheck(results, action) {
           return true;
         }
         break;
+				
       default:
         return false;
     }

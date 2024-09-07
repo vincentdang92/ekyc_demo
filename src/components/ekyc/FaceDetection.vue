@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a-alert   v-if="!loadingVideo" c :message="`${ randomActionSequenceRef[stepRef]?.message }`" type="success" ></a-alert>
+        <a-alert :data-type="`${typeMessage}`"  v-if="!loadingVideo" c :message="`${ randomActionSequenceRef[stepRef]?.message }`" :type="typeMessage" ></a-alert>
 
         <VideoBox>
             <div v-if="loadingVideo" class="pre-loading-video">
@@ -8,9 +8,12 @@
             </div>
             <div class="video-box">
                 <video style=" max-width: 100%;" v-show="!isPhotoTaken" ref="camera" webkit-playsinline playsinline autoplay :onPlay="handleGetUserMedia"></video>
-                <canvas id="photoTaken" ref="canvas" style=" max-width: 100%;  display:none" :width="450" :height="337.5"></canvas>
+                <canvas id="photoTaken" ref="canvas"  style="max-width: 100%; position: absolute; top: -20px; left: 0;" :width="600" :height="400" ></canvas>
             </div>
         </VideoBox>
+        <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
+        <a-button  type="primary" @click="captureDemoImage" >Chụp ảnh</a-button>
+
     </div>
 </template>
 <script>
@@ -24,7 +27,7 @@ import { FaceMesh } from "@mediapipe/face_mesh";
 import { shuffleFromPositionOne } from "@/utility/ekyc/shuffle-array";
 import { setIntervalAsync } from "set-interval-async/dynamic";
 import { clearIntervalAsync } from "set-interval-async";
-import { faceLiveNessCheck, getBoundingBox } from "@/utility/ekyc/face-liveness";
+import { faceLiveNessCheck, getBoundingBox, checkFaceFitsEllipse } from "@/utility/ekyc/face-liveness";
 
 import { VideoBox } from './style.js'
 import delay from "@/utility/ekyc/delay";
@@ -59,6 +62,7 @@ export default defineComponent({
 
         const getActionsSequence = () => {
             let sequence = shuffleFromPositionOne(faceActions);
+
             sequence.push(faceActions[0]);
             return sequence;
         };
@@ -83,7 +87,11 @@ export default defineComponent({
         const cameraType = ref('user');
         const camera = ref(null);
         const canvas = ref(null);
-        const image = ref('');  
+        const image = ref(''); 
+        //new 
+        const typeMessage = ref('success');
+        const srcImgDemo = ref('');
+
         var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
@@ -108,80 +116,142 @@ export default defineComponent({
                 if(camera.value == null){
                     return false;
                 }
+                const context = canvas.value.getContext('2d');
+                        
+                // Clear the canvas on every frame
+                context.clearRect(0, 0, canvas.value.width, canvas.value.height);
+                context.fillStyle = 'rgba(255, 255, 255, 1)'; // Light gray with some transparency
+                context.fillRect(0, 0, canvas.value.width, canvas.value.height);
+
+                // Draw the ellipse on the canvas (centered)
+                const ellipseCenterX = canvas.value.width / 2;
+                const ellipseCenterY = canvas.value.height / 2;
+                const ellipseRadiusX = 120;  // Horizontal radius
+                const ellipseRadiusY = 170;  // Vertical radius
+                context.globalCompositeOperation = 'destination-out';
+                context.beginPath();
+                context.ellipse(ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 0, 0, 2 * Math.PI);
+                context.fill();
+
+                // Reset composite operation to default for drawing face landmarks
+                context.globalCompositeOperation = 'source-over';
+                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY);
+
                 // Setting up callback for face detection for the first time
                 if (!setUpFaceDetectionCallBack.value) {
                     console.log("Start liveness check");
                     setUpFaceDetectionCallBack.value = true;
-        
+                    
                     faceMesh.onResults(async (results) => {
-                    // Just to check if the countdown reset the step in-between the face liveness check
-                    let currentStep = stepRef.value;
-        
-                    // Check if the user moves the face outside of the camera
-                    if (
-                        results.multiFaceLandmarks &&
-                        results.multiFaceLandmarks.length === 0 &&
-                        stepRef.value !== 0
-                    ) {
-                        firstStepDelayRef.value = true;
-                        alertAudio.play();
-                        validFrameCountRef.value = 0;
-                        randomActionSequenceRef.value = getActionsSequence();
-                        stepRef.value = 0;
-                    }
-                    // Check if the user does the required action for VALID_FRAME number of frames.
-                    else if (
-                        faceLiveNessCheck(
-                        results,
-                        randomActionSequenceRef.value[currentStep].action
-                        ) &&
-                        currentStep === stepRef.value
-                    ) {
-                        if (validFrameCountRef.value < VALID_FRAME) {
-                        validFrameCountRef.value += 1;
-                        } else {
-                        // If first step, take the picture
-                        if (stepRef.value === 0) {
-                            const canvas = results.image;
-                            if(canvas === null) return false;
-                            const { x1, x2, y1, y2 } = getBoundingBox(results);
-                            // Check if the face is fully presented
-                            if (
-                            x1 >= 0 &&
-                            y1 >= 0 &&
-                            x2 <= canvas.width &&
-                            y2 <= canvas.height
-                            ) {
+                        // Just to check if the countdown reset the step in-between the face liveness check
+                        let currentStep = stepRef.value;
+                        //vẽ chấm xanh để so sánh
+                        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                            if(results.multiFaceLandmarks.length == 1){
+                                drawFaceLandmarks(context, results.multiFaceLandmarks[0]);
+                            }
+                            else{
+                                console.log(`Chỉ nhận một khuôn mặt khi eKYC`);
+                                typeMessage.value = 'error';
+                            }
+                        }
+                        //vẽ chấm xanh để so sánh
+                        //check face in ellipse
+                        if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+                            const checkFitEllipse = checkFaceFitsEllipse(results.multiFaceLandmarks[0], ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY);
+                            console.log("checkFitEllipse result: ", checkFitEllipse);
                             faceImageRef.value = results.image.toDataURL("image/jpeg");
-                            confirmAudio.play();
-                            validFrameCountRef.value = 0;
-                            stepRef.value += 1;
+                            if(checkFitEllipse < 1.2 && checkFitEllipse > 0.95 && faceLiveNessCheck(results, 'forward')){
+                                typeMessage.value = 'warning';
+                                confirmAudio.play();
+                                srcImgDemo.value = faceImageRef.value;
+                                isCameraOpen.value = false;
+                                // isPhotoTaken.value = false;
+                                let tracks = camera.value.srcObject.getTracks();
+                                tracks.forEach(async track => {
+                                    await delay(1000)
+                                    track.stop();
+                                });
+                                
+                                //close modal ekyc
+                                //emit("closemodalkyc", true);
+                                clearIntervalAsync(timer);
                             }
-                        } else {
-                            if (
-                            stepRef.value !==
-                            randomActionSequenceRef.value.length - 1
-                            ) {
-                            confirmAudio.play();
+                            else{
+                                typeMessage.value = 'error';
+                            }
+                        }
+                        //end check face in ellipse
+
+                        // Check if the user moves the face outside of the camera
+                        if (
+                            results.multiFaceLandmarks &&
+                            results.multiFaceLandmarks.length === 0 &&
+                            stepRef.value !== 0
+                        ) {
+                            firstStepDelayRef.value = true;
+                            alertAudio.play();
                             validFrameCountRef.value = 0;
-                            stepRef.value += 1;
+                            randomActionSequenceRef.value = getActionsSequence();
+                            stepRef.value = 0;
+                        }
+                        // Check if the user does the required action for VALID_FRAME number of frames.
+                        else if (
+                            faceLiveNessCheck(
+                            results,
+                            randomActionSequenceRef.value[currentStep].action
+                            ) &&
+                            currentStep === stepRef.value
+                        ) {
+                            if (validFrameCountRef.value < VALID_FRAME) {
+                            validFrameCountRef.value += 1;
                             } else {
-                            confirmAudio.play();
-                            console.log("Stop liveness check end step 1");
-                            stopCameraStream();
-                            isPhotoTaken.value = true;
-                            //close modal ekyc
-                            emit("closemodalkyc", true);
-                            clearIntervalAsync(timer);
+                            // If first step, take the picture
+                            if (stepRef.value === 0) {
+                                const canvas = results.image;
+                                if(canvas === null) return false;
+                                const { x1, x2, y1, y2 } = getBoundingBox(results);
+                                // Check if the face is fully presented
+                                if (
+                                x1 >= 0 &&
+                                y1 >= 0 &&
+                                x2 <= canvas.width &&
+                                y2 <= canvas.height
+                                ) {
+                                    faceImageRef.value = results.image.toDataURL("image/jpeg");
+                                    confirmAudio.play();
+                                    validFrameCountRef.value = 0;
+                                    stepRef.value += 1;
+                                }
+                            } else {
+                                if (
+                                stepRef.value !==
+                                randomActionSequenceRef.value.length - 1
+                                ) {
+                                    confirmAudio.play();
+                                    validFrameCountRef.value = 0;
+                                    stepRef.value += 1;
+                                } else {
+                                    confirmAudio.play();
+                                    console.log("Stop liveness check end step 1");
+                                    stopCameraStream();
+                                    isPhotoTaken.value = true;
+                                    //close modal ekyc
+                                    emit("closemodalkyc", true);
+                                    clearIntervalAsync(timer);
+                                }
+                            }
                             }
                         }
+                        // Reset frame count when the user fails the liveness check
+                        else if (currentStep === stepRef.value) {
+                            validFrameCountRef.value = 0;
                         }
-                    }
-                    // Reset frame count when the user fails the liveness check
-                    else if (currentStep === stepRef.value) {
-                        validFrameCountRef.value = 0;
-                    }
                     });
+                    
+                    
+
+
                 }
         
                 await faceMesh.send({ image: camera.value });
@@ -205,9 +275,29 @@ export default defineComponent({
 
         })
 
-       
+        
+        // Function to draw the ellipse
+        const drawEllipse = (context, x, y, rx, ry) => {
+            context.beginPath();
+            context.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
+            context.strokeStyle = 'blue';  // Ellipse color
+            context.lineWidth = 3;         // Ellipse border thickness
+            context.stroke();
+        }
+        // Function to draw face landmarks for feedback
+        const drawFaceLandmarks = (context, landmarks) => {
+            context.fillStyle = 'green';
+            for (let i = 0; i < landmarks.length; i++) {
+                const x = landmarks[i].x* 600;  // Adjust for canvas size
+                const y = landmarks[i].y *400;
+                context.fillRect(x, y, 3, 3);    // Small dot for each landmark
+            }
+        }
 
-
+        const captureDemoImage = () => {
+            console.log(faceImageRef.value, 'faceImageRef');
+            srcImgDemo.value = faceImageRef.value;
+        }
         const handleOpenCamera = () => {
             image.value = "";
             isPhotoTaken.value = false;
@@ -280,7 +370,11 @@ export default defineComponent({
             image,
             sharpness,
             randomActionSequenceRef,
-            stepRef
+            stepRef,
+            //new
+            typeMessage,
+            captureDemoImage,
+            srcImgDemo
         }
     }
 });
