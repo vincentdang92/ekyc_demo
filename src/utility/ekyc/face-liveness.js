@@ -138,7 +138,6 @@ function rightEyeRatio(results) {
   return horizontalDistance / verticalDistance;
 }
 //detect face fit ellipse custom
-
 export function checkFaceFitsEllipse(faceLandmarks, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY) {
 	// Key facial landmarks indices, for example, using face-api.js or MediaPipe FaceMesh
 	const keyLandmarkIndices = [10, 151, 152, 234, 454, 13, 1]; // Example points: nose, eyes, mouth, chin
