@@ -11,8 +11,8 @@
                 <canvas id="photoTaken" ref="canvas"  style="max-width: 100%; position: absolute; top: -20px; left: 0;" :width="600" :height="400" ></canvas>
             </div>
         </VideoBox>
-        <!-- <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
-        <a-button  type="primary" @click="captureDemoImage" >Chụp ảnh</a-button> -->
+        <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
+        <a-button  type="primary" @click="captureDemoImage" >Chụp ảnh</a-button>
 
     </div>
 </template>
@@ -27,7 +27,7 @@ import { FaceMesh } from "@mediapipe/face_mesh";
 import { shuffleFromPositionOne } from "@/utility/ekyc/shuffle-array";
 import { setIntervalAsync } from "set-interval-async/dynamic";
 import { clearIntervalAsync } from "set-interval-async";
-import { faceLiveNessCheck, getBoundingBox } from "@/utility/ekyc/face-liveness";
+import { checkFaceFitsEllipse, faceLiveNessCheck, getBoundingBox } from "@/utility/ekyc/face-liveness";
 
 import { VideoBox } from './style.js'
 import delay from "@/utility/ekyc/delay";
@@ -53,11 +53,17 @@ export default defineComponent({
 
         const faceActions = [
             { action: "forward", message: "Nhìn thẳng về phía máy ảnh" },
-            { action: "up", message: "Quay lên trên" },
-            { action: "down", message: "Quay xuống dưới" },
-            { action: "left", message: "Quay sang trái" },
-            { action: "right", message: "Quay sang phải" },
+            // { action: "up", message: "Quay lên trên" },
+            // { action: "down", message: "Quay xuống dưới" },
+            // { action: "left", message: "Quay sang trái" },
+            // { action: "right", message: "Quay sang phải" },
             { action: "eye-closed", message: "Nhắm mắt" },
+            
+        ];
+        //ellipse message action
+        const ellipseAction = [
+            { action: "camera-far", message: "Vui lòng đưa camera lại gần hơn" },
+            { action: "camera-near", message: "Vui lòng đưa camera xa hơn" },
         ];
 
         const getActionsSequence = () => {
@@ -89,8 +95,8 @@ export default defineComponent({
         const canvas = ref(null);
         const image = ref(''); 
         //new 
-        // const typeMessage = ref('success');
-        // const srcImgDemo = ref('');
+        const typeMessage = ref('success');
+        const srcImgDemo = ref('');
 
         var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
         if(process.env.NODE_ENV !== "production"){
@@ -157,30 +163,33 @@ export default defineComponent({
                         }
                         //vẽ chấm xanh để so sánh
                         //check face in ellipse
-                        // if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
-                        //     const checkFitEllipse = checkFaceFitsEllipse(results.multiFaceLandmarks[0], ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY);
-                        //     console.log("checkFitEllipse result: ", checkFitEllipse);
-                        //     faceImageRef.value = results.image.toDataURL("image/jpeg");
-                        //     if(checkFitEllipse < 1.2 && checkFitEllipse > 0.95 && faceLiveNessCheck(results, 'forward')){
-                        //         typeMessage.value = 'warning';
-                        //         confirmAudio.play();
-                        //         srcImgDemo.value = faceImageRef.value;
-                        //         isCameraOpen.value = false;
-                        //         // isPhotoTaken.value = false;
-                        //         let tracks = camera.value.srcObject.getTracks();
-                        //         tracks.forEach(async track => {
-                        //             await delay(1000)
-                        //             track.stop();
-                        //         });
+                        if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+                            const checkFitEllipse = checkFaceFitsEllipse(results.multiFaceLandmarks[0], ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY);
+                            console.log("checkFitEllipse result: ", checkFitEllipse);
+                            if(checkFitEllipse < 0.95){
                                 
-                        //         //close modal ekyc
-                        //         //emit("closemodalkyc", true);
-                        //         clearIntervalAsync(timer);
-                        //     }
-                        //     else{
-                        //         typeMessage.value = 'error';
-                        //     }
-                        // }
+                            }
+                            faceImageRef.value = results.image.toDataURL("image/jpeg");
+                            if(checkFitEllipse < 1.2 && checkFitEllipse > 0.95 && faceLiveNessCheck(results, 'forward')){
+                                typeMessage.value = 'warning';
+                                confirmAudio.play();
+                                srcImgDemo.value = faceImageRef.value;
+                                isCameraOpen.value = false;
+                                // isPhotoTaken.value = false;
+                                let tracks = camera.value.srcObject.getTracks();
+                                tracks.forEach(async track => {
+                                    await delay(1000)
+                                    track.stop();
+                                });
+                                
+                                //close modal ekyc
+                                //emit("closemodalkyc", true);
+                                clearIntervalAsync(timer);
+                            }
+                            else{
+                                typeMessage.value = 'error';
+                            }
+                        }
                         //end check face in ellipse
 
                         // Check if the user moves the face outside of the camera
@@ -294,10 +303,10 @@ export default defineComponent({
             }
         }
 
-        // const captureDemoImage = () => {
-        //     console.log(faceImageRef.value, 'faceImageRef');
-        //     srcImgDemo.value = faceImageRef.value;
-        // }
+        const captureDemoImage = () => {
+            console.log(faceImageRef.value, 'faceImageRef');
+            srcImgDemo.value = faceImageRef.value;
+        }
         const handleOpenCamera = () => {
             image.value = "";
             isPhotoTaken.value = false;
@@ -372,9 +381,9 @@ export default defineComponent({
             randomActionSequenceRef,
             stepRef,
             //new
-            // typeMessage,
-            // captureDemoImage,
-            // srcImgDemo
+            typeMessage,
+            captureDemoImage,
+            srcImgDemo
         }
     }
 });
