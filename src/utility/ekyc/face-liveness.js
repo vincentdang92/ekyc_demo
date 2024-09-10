@@ -145,7 +145,7 @@ export function checkFaceFitsEllipse(faceLandmarks, ellipseCenterX, ellipseCente
 	// Loop through the key face landmarks to check if they fit within the ellipse
 	for (let i = 0; i < keyLandmarkIndices.length; i++) {
 			const index = keyLandmarkIndices[i];
-			const x = faceLandmarks[index].x * 600 - 50;
+			const x = faceLandmarks[index].x * 600 + 50;
 			const y = faceLandmarks[index].y * 400 - 50;
 
 			// Apply the ellipse fit formula
@@ -156,7 +156,6 @@ export function checkFaceFitsEllipse(faceLandmarks, ellipseCenterX, ellipseCente
 			return isInsideEllipse;
 			
 	}
-
 	// All key landmarks are inside the ellipse
 	return true;
 }

@@ -184,7 +184,7 @@ export default defineComponent({
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            else if(checkFitEllipse < 0.9){
+                            else if(checkFitEllipse < 0.85){
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('camera-near') + " Point: " +checkFitEllipse;
                                 alertAudio.play();
@@ -196,12 +196,7 @@ export default defineComponent({
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            else if(checkFitEllipse < 0.7){
-                            typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('camera-far') + " Point: " +checkFitEllipse;
-                                alertAudio.play();
-                                validFaceInEllipse.value = false;
-                            }
+                            
                             else{
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('keep-straight')+ " Point: " +checkFitEllipse;
@@ -210,7 +205,7 @@ export default defineComponent({
                                 
                             }
                             //console.log("Running...");
-                            if((checkFitEllipse > 0.9 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
+                            if((checkFitEllipse > 0.85 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'success';
                                 validFaceInEllipse.value = true;
                                 //debug
