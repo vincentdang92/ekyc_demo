@@ -173,8 +173,12 @@ export function faceLiveNessCheck(results, action) {
     switch (action) {
       case "forward":
         if (yaw >= -10 && yaw <= 10 && pitch >= -7 && pitch <= 7) {
+					//console.log("Góc mặt ok: ",yaw, pitch);
           return true;
         }
+				else{
+					//console.log("Góc mặt lệch: ",yaw, pitch);
+				}
         break;
       case "up":
         if (pitch >= 9) {

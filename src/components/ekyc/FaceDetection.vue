@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a-alert   v-if="!loadingVideo" c :message="`${ ekycNoticeMessage }`" :type="typeMessage"  ></a-alert>
+        <a-alert style=" margin-bottom:10px;"  v-if="!loadingVideo" c :message="`${ ekycNoticeMessage }`" :type="typeMessage"  ></a-alert>
 
         <VideoBox>
             <div v-if="loadingVideo" class="pre-loading-video">
@@ -184,13 +184,13 @@ export default defineComponent({
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            else if(checkFitEllipse < 0.85){
+                            else if(checkFitEllipse < 0.81){
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('camera-near') + " Point: " +checkFitEllipse;
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            else if(checkFitEllipse > 1.4){
+                            else if(checkFitEllipse > 1.45){
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('camera-far') + " Point: " +checkFitEllipse;
                                 alertAudio.play();
@@ -198,14 +198,14 @@ export default defineComponent({
                             }
                             
                             else{
-                                typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('keep-straight')+ " Point: " +checkFitEllipse;
-                                alertAudio.play();
-                                validFaceInEllipse.value = false;
+                                // typeMessage.value = 'warning';
+                                // ekycNoticeMessage.value = findActionByKey('keep-straight')+ " Point: " +checkFitEllipse;
+                                // alertAudio.play();
+                                // validFaceInEllipse.value = false;
                                 
                             }
                             //console.log("Running...");
-                            if((checkFitEllipse > 0.85 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
+                            if((checkFitEllipse > 0.81 && checkFitEllipse < 1.45 ) && faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'success';
                                 validFaceInEllipse.value = true;
                                 //debug
@@ -420,9 +420,9 @@ export default defineComponent({
         
         onMounted(() => {
             if (window.innerWidth < 991) {
-                videoBoxStyle.value.height = '200px';
-                ellipseRadiusConstX.value = 130;
-                ellipseRadiusConstY.value = 170;
+                videoBoxStyle.value.height = '240px';
+                ellipseRadiusConstX.value = 150;
+                ellipseRadiusConstY.value = 200;
             }
             handleOpenCamera();
             
@@ -468,6 +468,7 @@ export default defineComponent({
     @media (max-width: 992px) {
         #photoTaken{
             top: 0px !important;
+            height: 101% !important;
         }
     }
 </style>
