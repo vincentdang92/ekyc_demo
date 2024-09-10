@@ -63,10 +63,10 @@ export default defineComponent({
         ];
         //ellipse message action
         const ellipseAction = [
-            { action: "camera-far", message: "Vui lòng đưa camera xa hơn <br>" },
-            { action: "camera-near", message: "Vui lòng đưa camera lại gần hơn <br>" },
-            { action: 'keep-straight', message: 'Vui lòng giữ yên camera <br>' },
-            { action: 'camera-straight', message: 'Vui lòng nhìn thẳng <br>' }
+            { action: "camera-far", message: "Vui lòng đưa camera xa hơn" },
+            { action: "camera-near", message: "Vui lòng đưa camera lại gần hơn " },
+            { action: 'keep-straight', message: 'Vui lòng giữ yên camera' },
+            { action: 'camera-straight', message: 'Vui lòng nhìn thẳng' }
         ];
 
         const getActionsSequence = () => {
@@ -178,25 +178,25 @@ export default defineComponent({
                         //check face in ellipse
                         if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
                             const checkFitEllipse = checkFaceFitsEllipse(results.multiFaceLandmarks[0], ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, isMobile);
-                            if(!faceLiveNessCheck(results, 'forward')){
-                                typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('camera-straight') + " Point: " +checkFitEllipse;
-                                alertAudio.play();
-                                validFaceInEllipse.value = false;
-                            }
-                            else if(checkFitEllipse < 0.81){
+                            
+                            if(checkFitEllipse < 0.83){
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('camera-near') + " Point: " +checkFitEllipse;
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            else if(checkFitEllipse > 1.45){
+                            else if(checkFitEllipse > 1.4){
                                 typeMessage.value = 'warning';
                                 ekycNoticeMessage.value = findActionByKey('camera-far') + " Point: " +checkFitEllipse;
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
                             }
-                            
+                            else if(!faceLiveNessCheck(results, 'forward')){
+                                typeMessage.value = 'warning';
+                                ekycNoticeMessage.value = findActionByKey('camera-straight') + " Point: " +checkFitEllipse;
+                                alertAudio.play();
+                                validFaceInEllipse.value = false;
+                            }
                             else{
                                 // typeMessage.value = 'warning';
                                 // ekycNoticeMessage.value = findActionByKey('keep-straight')+ " Point: " +checkFitEllipse;
@@ -205,7 +205,7 @@ export default defineComponent({
                                 
                             }
                             //console.log("Running...");
-                            if((checkFitEllipse > 0.81 && checkFitEllipse < 1.45 ) && faceLiveNessCheck(results, 'forward')){
+                            if((checkFitEllipse > 0.83 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'success';
                                 validFaceInEllipse.value = true;
                                 //debug
@@ -340,7 +340,7 @@ export default defineComponent({
             }, 10);
 
         })
-
+        
         //find message by action
         const findActionByKey = (actionToFind) => {
             const item = ellipseAction.find(item => item.action === actionToFind);
