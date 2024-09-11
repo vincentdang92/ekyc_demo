@@ -212,30 +212,34 @@ export default defineComponent({
                                 currentStep = 0;
                                 console.log(currentStep);
 
-                                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 'green');
-                                ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
-                                console.log("Start capture..............",checkFitEllipse);
+                                
+                                
                                 confirmAudio.play();
-                                faceImageRef.value = results.image.toDataURL("image/jpeg");
-                                // if(validFaceInEllipse.value){
-                                //     await delay(3000);
+                                
+                                if(validFaceInEllipse.value){
+                                    console.log("Start capture..............",checkFitEllipse);
+                                    drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 'green');
+                                    ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
+                                    await delay(2000);
                                     
-                                //     console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
-                                //     confirmAudio.play();
-                                //     srcImgDemo.value = faceImageRef.value;
-                                //     isCameraOpen.value = false;
-                                //     // isPhotoTaken.value = false;
-                                //     let tracks = camera.value.srcObject.getTracks();
-                                //     tracks.forEach(async track => {
-                                //         await delay(1000)
-                                //         track.stop();
-                                //     });
                                     
-                                //     //close modal ekyc
-                                //     //emit("closemodalkyc", true);
+                                    console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
+                                    faceImageRef.value = results.image.toDataURL("image/jpeg");
+                                    confirmAudio.play();
+                                    srcImgDemo.value = faceImageRef.value;
+                                    isCameraOpen.value = false;
+                                    //isPhotoTaken.value = false;
+                                    let tracks = camera.value.srcObject.getTracks();
+                                    tracks.forEach(async track => {
+                                        await delay(1000)
+                                        track.stop();
+                                    });
                                     
-                                //     clearIntervalAsync(timer);
-                                // }
+                                    //close modal ekyc
+                                    emit("closemodalkyc", true);
+                                    
+                                    clearIntervalAsync(timer);
+                                }
                             }
                             
                             
