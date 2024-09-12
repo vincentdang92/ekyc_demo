@@ -586,8 +586,8 @@ export default defineComponent({
       handleBackCard,
       handleFaceId,
       handleStartProcess,
-	  handleOpenFaceId,
-	  handleCloseModalKyc,
+      handleOpenFaceId,
+      handleCloseModalKyc,
       cardimageFront,
       cardimageBack,
       currentStep,
@@ -601,7 +601,7 @@ export default defineComponent({
       isUpload,
       isMobile,
       reAction,
-	  cardFaceIdTitle
+	    cardFaceIdTitle
     }
   }
 });

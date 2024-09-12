@@ -11,8 +11,8 @@
                 <canvas id="photoTaken" ref="canvas"  style="max-width: 100%; position: absolute; top: -25px; left: 0;" :width="canvasWidth" :height="canvasHeight" ></canvas>
             </div>
         </VideoBox>
-        <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
-        <a-button  type="primary" @click="captureDemoImage" >Chụp ảnh</a-button>
+        <!-- <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
+        <a-button  type="primary" @click="captureDemoImage" >Chụp ảnh</a-button> -->
 
     </div>
 </template>
@@ -54,11 +54,11 @@ export default defineComponent({
 
         const faceActions = [
             { action: "forward", message: "Nhìn thẳng về phía máy ảnh" },
-            { action: "up", message: "Quay lên trên" },
-            { action: "down", message: "Quay xuống dưới" },
-            { action: "left", message: "Quay sang trái" },
-            { action: "right", message: "Quay sang phải" },
-            { action: "eye-closed", message: "Nhắm mắt" },
+            // { action: "up", message: "Quay lên trên" },
+            // { action: "down", message: "Quay xuống dưới" },
+            // { action: "left", message: "Quay sang trái" },
+            // { action: "right", message: "Quay sang phải" },
+            // { action: "eye-closed", message: "Nhắm mắt" },
             
         ];
         //ellipse message action
@@ -108,7 +108,7 @@ export default defineComponent({
         const ellipseRadiusConstY = ref(170);
         const videoBoxStyle = ref({});
        
-        
+        let isProcessing = ref(false);
 
         var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
         if(process.env.NODE_ENV !== "production"){
@@ -163,11 +163,11 @@ export default defineComponent({
                     
                     faceMesh.onResults(async (results) => {
                         // Just to check if the countdown reset the step in-between the face liveness check
-                        let currentStep = stepRef.value;
+                        //let currentStep = stepRef.value;
                         //vẽ chấm xanh để so sánh
                         if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                             if(results.multiFaceLandmarks.length == 1){
-                                drawFaceLandmarks(context, results.multiFaceLandmarks[0]);
+                                //drawFaceLandmarks(context, results.multiFaceLandmarks[0]);
                             }
                             else{
                                 console.log(`Chỉ nhận một khuôn mặt khi eKYC`);
@@ -208,37 +208,26 @@ export default defineComponent({
                             if((checkFitEllipse > 0.83 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'success';
                                 validFaceInEllipse.value = true;
-                                //debug
-                                currentStep = 0;
-                                console.log(currentStep);
-
                                 
-                                
-                                confirmAudio.play();
-                                
-                                if(validFaceInEllipse.value){
-                                    console.log("Start capture..............",checkFitEllipse);
-                                    drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 'green');
+                                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 'green');
+                                if(validFaceInEllipse.value && !isProcessing.value){
+                                    isProcessing.value = true;
+                                    //console.log("Start capture..............",checkFitEllipse);
+                                    
                                     ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
                                     await delay(2000);
-                                    
-                                    
-                                    console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
+                                    //console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
                                     faceImageRef.value = results.image.toDataURL("image/jpeg");
-                                    confirmAudio.play();
-                                    srcImgDemo.value = faceImageRef.value;
-                                    isCameraOpen.value = false;
-                                    //isPhotoTaken.value = false;
-                                    let tracks = camera.value.srcObject.getTracks();
-                                    tracks.forEach(async track => {
-                                        await delay(1000)
-                                        track.stop();
-                                    });
                                     
+                                    confirmAudio.play();
+                                    //srcImgDemo.value = faceImageRef.value;
+                                    console.log("Stop liveness check");
+                                    stopCameraStream();
+                                    isPhotoTaken.value = true;
                                     //close modal ekyc
                                     emit("closemodalkyc", true);
-                                    
                                     clearIntervalAsync(timer);
+
                                 }
                             }
                             
@@ -355,22 +344,28 @@ export default defineComponent({
             context.beginPath();
             context.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
             context.strokeStyle = styleColor;  // Ellipse color
-            context.lineWidth = 3;         // Ellipse border thickness
+            if(styleColor == "green"){
+                context.lineWidth = 6;
+            }
+            else{
+                context.lineWidth = 3;
+            }   
+            // Ellipse border thickness
             context.stroke();
         }
         // Function to draw face landmarks for feedback
-        const drawFaceLandmarks = (context, landmarks) => {
-            context.fillStyle = 'green';
-            for (let i = 0; i < landmarks.length; i++) {
-                let x = landmarks[i].x* 600;  // Adjust for canvas size
-                let y = landmarks[i].y *400;
-                if(isMobile){
-                    x = landmarks[i].x* 600;  // Adjust for canvas size
-                    y = landmarks[i].y *400;
-                }
-                context.fillRect(x, y, 3, 3);    // Small dot for each landmark
-            }
-        }
+        // const drawFaceLandmarks = (context, landmarks) => {
+        //     context.fillStyle = 'green';
+        //     for (let i = 0; i < landmarks.length; i++) {
+        //         let x = landmarks[i].x* 600;  // Adjust for canvas size
+        //         let y = landmarks[i].y *400;
+        //         if(isMobile){
+        //             x = landmarks[i].x* 600;  // Adjust for canvas size
+        //             y = landmarks[i].y *400;
+        //         }
+        //         context.fillRect(x, y, 3, 3);    // Small dot for each landmark
+        //     }
+        // }
 
         const captureDemoImage = () => {
             console.log(faceImageRef.value, 'faceImageRef');
@@ -414,6 +409,13 @@ export default defineComponent({
                 await delay(1000)
                 track.stop();
             });
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(track => track.stop());
+                    })
+                    .catch(err => console.log('No media devices: ', err));
+            }
         }
 
         const changeCam = () => {
