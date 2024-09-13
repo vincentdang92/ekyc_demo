@@ -378,16 +378,16 @@ export default defineComponent({
     }
     const handleCancelPopup = (async() => {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        console.log("xxxxxxxxxxxxxxxxxxx");
+        
           navigator.mediaDevices.getUserMedia({ video: true })
               .then(stream => {
                   stream.getTracks().forEach(track => track.stop());
               })
               .catch(err => console.log('No media devices: ', err));
       }
-		await delay(1000);
-		console.log('handleCancelPopup');
-		currentStep.value = "beginCheckFaceId";
+		  await delay(1000);
+		  console.log('handleCancelPopup');
+		    currentStep.value = "beginCheckFaceId";
         isUpload.value = false
         open.value = false
         visibleModal.value = false

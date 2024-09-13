@@ -8,7 +8,7 @@
             </div>
             <div class="video-box"  :style="videoBoxStyle">
                 <video style=" max-width: 100%;" v-show="!isPhotoTaken" ref="camera" webkit-playsinline playsinline autoplay :onPlay="handleGetUserMedia"></video>
-                <canvas id="photoTaken" ref="canvas"  style="max-width: 100%; position: absolute; top: -25px; left: 0;" :width="canvasWidth" :height="canvasHeight" ></canvas>
+                <canvas id="photoTaken" ref="canvas"  style="max-width: 100%; position: absolute; top: -24px; left: 0;" :width="canvasWidth" :height="canvasHeight" ></canvas>
             </div>
         </VideoBox>
         <!-- <img :src="srcImgDemo" :width="400" v-show="srcImgDemo.length > 0"  />
@@ -80,7 +80,7 @@ export default defineComponent({
         let setUpFaceDetectionCallBack = ref(false);
         let stepRef = ref(0);
         let firstStepDelayRef = ref(true);
-        //let validFrameCountRef = ref(0);
+        let validFrameCountRef = ref(0);
         let faceImageRef = ref(null);
         // let cameraRef = ref(null);
         let faceMesh = null;
@@ -98,16 +98,16 @@ export default defineComponent({
         const canvas = ref(null);
         const image = ref(''); 
         //new 
-        const typeMessage = ref('warning');
-        const srcImgDemo = ref('');
-        const ekycNoticeMessage = ref('Vui lòng nhìn thẳng.');
-        const validFaceInEllipse = ref(false);
-        const canvasWidth = ref(600);
-        const canvasHeight = ref(400);
-        const ellipseRadiusConstX = ref(120);
-        const ellipseRadiusConstY = ref(170);
-        const videoBoxStyle = ref({});
-       
+        let typeMessage = ref('warning');
+        let srcImgDemo = ref('');
+        let ekycNoticeMessage = ref('Vui lòng nhìn thẳng.');
+        let validFaceInEllipse = ref(false);
+        let canvasWidth = ref(600);
+        let canvasHeight = ref(400);
+        let ellipseRadiusConstX = ref(120);
+        let ellipseRadiusConstY = ref(170);
+        let videoBoxStyle = ref({});
+         let openEyeCounter = ref(0);
         let isProcessing = ref(false);
 
         var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
@@ -115,10 +115,7 @@ export default defineComponent({
             nh_url = '';
         }
         const handleGetUserMedia = (async () => {
-
             randomActionSequenceRef.value = getActionsSequence();
-            
-        
             faceMesh = new FaceMesh({
                 locateFile: (file) => {
                     return nh_url+"/component/face_mesh/" + file;
@@ -154,7 +151,7 @@ export default defineComponent({
 
                 // Reset composite operation to default for drawing face landmarks
                 context.globalCompositeOperation = 'source-over';
-                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY);
+                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, validFaceInEllipse.value);
 
                 // Setting up callback for face detection for the first time
                 if (!setUpFaceDetectionCallBack.value) {
@@ -204,31 +201,47 @@ export default defineComponent({
                                 // validFaceInEllipse.value = false;
                                 
                             }
+                            console.log(`-------runing------------validFrameCountRef: ${validFrameCountRef.value}`);
+                            
                             //console.log("Running...");
                             if((checkFitEllipse > 0.83 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'success';
                                 validFaceInEllipse.value = true;
-                                
-                                drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, 'green');
-                                if(validFaceInEllipse.value && !isProcessing.value){
-                                    isProcessing.value = true;
-                                    //console.log("Start capture..............",checkFitEllipse);
-                                    
-                                    ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
-                                    await delay(2000);
-                                    //console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
-                                    faceImageRef.value = results.image.toDataURL("image/jpeg");
-                                    
-                                    confirmAudio.play();
-                                    //srcImgDemo.value = faceImageRef.value;
-                                    console.log("Stop liveness check");
-                                    stopCameraStream();
-                                    isPhotoTaken.value = true;
-                                    //close modal ekyc
-                                    emit("closemodalkyc", true);
-                                    clearIntervalAsync(timer);
+                                if(validFrameCountRef.value == 1){
+                                    if(validFaceInEllipse.value){
+                                        ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
+                                        drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, true);
+                                        await delay(120);
+                                        
+                                        openEyeCounter.value++;
+                                        if(openEyeCounter.value > 10 && !isProcessing.value){
+                                            faceImageRef.value = results.image.toDataURL("image/jpeg");
+                                            //console.log("Start capture..............",checkFitEllipse);
+                                            isProcessing.value = true;
+                                            //console.log("End capture..............",checkFitEllipse, validFaceInEllipse.value);
+                                            confirmAudio.play();
+                                            //srcImgDemo.value = faceImageRef.value;
+                                            console.log("Stop liveness check");
+                                            stopCameraStream();
+                                            isPhotoTaken.value = true;
+                                            //close modal ekyc
+                                            emit("closemodalkyc", true);
+                                            clearIntervalAsync(timer);
+                                        }
 
+                                    }
                                 }
+                                else{
+                                    
+                                    typeMessage.value = 'warning';
+                                    ekycNoticeMessage.value = "Vui lòng chớp mắt....";
+                                    if(faceLiveNessCheck(results, 'eye-closed')){
+                                        validFrameCountRef.value = 1;
+                                    }   
+                                }
+                            }
+                            else{
+                                validFaceInEllipse.value = false;
                             }
                             
                             
@@ -340,16 +353,17 @@ export default defineComponent({
             return item?.message;
         }
         // Function to draw the ellipse
-        const drawEllipse = (context, x, y, rx, ry, styleColor="blue") => {
+        const drawEllipse = (context, x, y, rx, ry, validFaceInEllipse) => {
             context.beginPath();
             context.ellipse(x, y, rx, ry, 0, 0, 2 * Math.PI);
-            context.strokeStyle = styleColor;  // Ellipse color
-            if(styleColor == "green"){
+            context.strokeStyle = validFaceInEllipse == true ? 'green' : 'blue';  // Ellipse color
+            if(context.strokeStyle == "green"){
                 context.lineWidth = 6;
             }
             else{
                 context.lineWidth = 3;
-            }   
+            }
+            //console.log(`context.strokeStyle ${context.strokeStyle} ${validFaceInEllipse}`);   
             // Ellipse border thickness
             context.stroke();
         }
