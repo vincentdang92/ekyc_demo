@@ -152,12 +152,10 @@ export default defineComponent({
                 // Reset composite operation to default for drawing face landmarks
                 context.globalCompositeOperation = 'source-over';
                 drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, validFaceInEllipse.value);
-
                 // Setting up callback for face detection for the first time
                 if (!setUpFaceDetectionCallBack.value) {
                     console.log("Start liveness check");
                     setUpFaceDetectionCallBack.value = true;
-                    
                     faceMesh.onResults(async (results) => {
                         // Just to check if the countdown reset the step in-between the face liveness check
                         //let currentStep = stepRef.value;
@@ -178,21 +176,27 @@ export default defineComponent({
                             
                             if(checkFitEllipse < 0.83){
                                 typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('camera-near') + " Point: " +checkFitEllipse;
+                                ekycNoticeMessage.value = findActionByKey('camera-near');
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
+                                validFrameCountRef.value = 0;
+                                openEyeCounter.value = 0;
                             }
                             else if(checkFitEllipse > 1.4){
                                 typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('camera-far') + " Point: " +checkFitEllipse;
+                                ekycNoticeMessage.value = findActionByKey('camera-far');
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
+                                validFrameCountRef.value = 0;
+                                openEyeCounter.value = 0;
                             }
                             else if(!faceLiveNessCheck(results, 'forward')){
                                 typeMessage.value = 'warning';
-                                ekycNoticeMessage.value = findActionByKey('camera-straight') + " Point: " +checkFitEllipse;
+                                ekycNoticeMessage.value = findActionByKey('camera-straight');
                                 alertAudio.play();
                                 validFaceInEllipse.value = false;
+                                validFrameCountRef.value = 0;
+                                openEyeCounter.value = 0;
                             }
                             else{
                                 // typeMessage.value = 'warning';
@@ -201,7 +205,7 @@ export default defineComponent({
                                 // validFaceInEllipse.value = false;
                                 
                             }
-                            console.log(`-------runing------------validFrameCountRef: ${validFrameCountRef.value}`);
+                            //console.log(`-------runing------------validFrameCountRef: ${validFrameCountRef.value}`);
                             
                             //console.log("Running...");
                             if((checkFitEllipse > 0.83 && checkFitEllipse < 1.4 ) && faceLiveNessCheck(results, 'forward')){
@@ -209,7 +213,7 @@ export default defineComponent({
                                 validFaceInEllipse.value = true;
                                 if(validFrameCountRef.value == 1){
                                     if(validFaceInEllipse.value){
-                                        ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera....";
+                                        ekycNoticeMessage.value = "Đang xử lý. Vui lòng giữ yên camera";
                                         drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, true);
                                         await delay(120);
                                         
@@ -234,7 +238,8 @@ export default defineComponent({
                                 else{
                                     
                                     typeMessage.value = 'warning';
-                                    ekycNoticeMessage.value = "Vui lòng chớp mắt....";
+                                    ekycNoticeMessage.value = "Vui lòng chớp mắt";
+                                    drawEllipse(context, ellipseCenterX, ellipseCenterY, ellipseRadiusX, ellipseRadiusY, false);
                                     if(faceLiveNessCheck(results, 'eye-closed')){
                                         validFrameCountRef.value = 1;
                                     }   
@@ -250,6 +255,8 @@ export default defineComponent({
                             typeMessage.value = 'warning';
                             ekycNoticeMessage.value = "không tìm thấy khuôn mặt."
                             validFaceInEllipse.value = false;
+                            validFrameCountRef.value = 0;
+                            openEyeCounter.value = 0;
                         }
                         //end check face in ellipse
 
