@@ -84,7 +84,7 @@ export default defineComponent({
         const camera = ref(null);
         const canvas = ref(null);
         const image = ref('');  
-        var nh_url = 'https://nhbk.nhanhoa.com/templates/ekyc_v2';
+        var nh_url = 'https://customer.nhanhoa.com/templates/ekyc_v2';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }
