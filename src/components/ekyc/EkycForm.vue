@@ -46,19 +46,19 @@
           <a-timeline>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'cardFront' ">
-                
+                <a-spin />
               </template>
-              Ảnh CCCD mặt trước
+              Kiểm tra ảnh mặt trước
             </a-timeline-item>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'cardBack' ">
-                
+                <a-spin />
               </template>
-              Ảnh CCCD mặt sau
+              Kiểm tra ảnh mặt sau
             </a-timeline-item>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'face' ">
-               
+                <a-spin />
               </template>
               Kiểm tra sinh trắc
             </a-timeline-item>
