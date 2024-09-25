@@ -46,19 +46,19 @@
           <a-timeline>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'cardFront' ">
-                <a-spin />
+                
               </template>
-              Kiểm tra ảnh mặt trước
+              Ảnh CCCD mặt trước
             </a-timeline-item>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'cardBack' ">
-                <a-spin />
+                
               </template>
-              Kiểm tra ảnh mặt sau
+              Ảnh CCCD mặt sau
             </a-timeline-item>
             <a-timeline-item>
               <template #dot v-if="currentStep === 'face' ">
-                <a-spin />
+               
               </template>
               Kiểm tra sinh trắc
             </a-timeline-item>
@@ -74,7 +74,7 @@
                 <img :src="cardimageFront" style="width: 100%" />
                 <a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" />
                 <div class="cardimage cardimage-front" v-else>
-                  <a-upload :max-count="1"  :before-upload="beforeUploadFrontCard" accept="image/png, image/jpeg" listType="picture">
+                  <a-upload :max-count="1"  :before-upload="beforeUploadFrontCard" :capture="null" accept="image/png, image/jpeg" listType="picture">
                     <a-button type="primary" outlined block>
                       <unicon name="upload" width="40"/>
                       Chọn ảnh từ máy
@@ -94,7 +94,7 @@
                 <img :src="cardimageBack" style="width: 100%" />
                   <a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" />
                   <div class="cardimage cardimage-back" v-else>
-                    <a-upload v-if="isUpload" :max-count="1"  accept="image/png, image/jpeg" listType="picture"
+                    <a-upload v-if="isUpload" :max-count="1" :capture="null"  accept="image/png, image/jpeg" listType="picture"
                       :before-upload="beforeUploadBackCard"
                     >
                     <a-button type="primary" outlined block>

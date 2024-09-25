@@ -1,7 +1,8 @@
 .DS_Store
 node_modules
 /dist
-
+#bundle faceid-ellipse
+/dist_ellipse
 
 # local env files
 .env.local
