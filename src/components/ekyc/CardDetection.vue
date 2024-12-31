@@ -62,7 +62,7 @@ export default defineComponent({
         const isDetected = ref(false);
         const onDetect = ref(false); //test
         // const cv = ref(null);
-        var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
+        var nh_url = 'https://vnsign.com/templates/ekyc-v3';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }

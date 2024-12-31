@@ -182,7 +182,8 @@ export default defineComponent({
 
     const cardimageFront = ref('')
     const cardimageBack = ref('')
-    const currentStep = ref('beginCheckFaceId')
+   // const currentStep = ref('beginCheckFaceId')
+    const currentStep = ref('cardFront')
     const visibleModal = ref(true)
     const open = ref(true)
     const requestId = 'NH' +Date.now().toString();
@@ -216,7 +217,8 @@ export default defineComponent({
       isUpload.value = false
       open.value = false
       visibleModal.value = false
-      currentStep.value = "beginCheckFaceId";
+      //currentStep.value = "beginCheckFaceId";
+      currentStep.value = "cardFront";
     }
     const delayStep = (async() => {
       await delay(5000);
@@ -323,7 +325,8 @@ export default defineComponent({
         message.info('Xác thực khuôn mặt thành công!');
       }
       else{
-        currentStep.value = "beginCheckFaceId";
+        //currentStep.value = "beginCheckFaceId";
+        currentStep.value = "cardFront";
         resetForm();
         message.error('Bạn đã hủy xác thực khuôn mặt!');
       }
@@ -387,7 +390,8 @@ export default defineComponent({
       }
 		  await delay(1000);
 		  console.log('handleCancelPopup');
-		    currentStep.value = "beginCheckFaceId";
+		    //currentStep.value = "beginCheckFaceId";
+        currentStep.value = "cardFront";
         isUpload.value = false
         open.value = false
         visibleModal.value = false

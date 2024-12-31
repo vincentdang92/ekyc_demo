@@ -110,7 +110,7 @@ export default defineComponent({
          let openEyeCounter = ref(0);
         let isProcessing = ref(false);
 
-        var nh_url = 'https://nhanhoa.com/khuyenmai/landing_id_vn/assets/ekyc';
+        var nh_url = 'https://vnsign.com/templates/ekyc-v3';
         if(process.env.NODE_ENV !== "production"){
             nh_url = '';
         }
