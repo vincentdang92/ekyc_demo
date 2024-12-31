@@ -74,7 +74,7 @@
             </a-col>
             <a-col :span="24" v-if="currentStep === 'cardFront'">
               <a-card title="Ảnh CCCD mặt trước">
-                <img :src="cardimageFront" style="width: 100%" />
+                <img :src="cardimageFront" style="width: 30%" />
                 <a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" />
                 <div class="cardimage cardimage-front" v-else>
                   <a-upload :max-count="1"  :before-upload="beforeUploadFrontCard" accept="image/png, image/jpeg" listType="picture">
@@ -94,7 +94,7 @@
 
             <a-col :span="24" v-if="currentStep === 'cardBack'">
                <a-card title="Ảnh CCCD mặt sau">
-                <img :src="cardimageBack" style="width: 100%" />
+                <img :src="cardimageBack" style="width: 50%" />
                   <a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" />
                   <div class="cardimage cardimage-back" v-else>
                     <a-upload v-if="isUpload" :max-count="1"  accept="image/png, image/jpeg" listType="picture"
@@ -111,8 +111,8 @@
             <a-col  :span="24" v-if="currentStep === 'face'" >
               <a-card :title="cardFaceIdTitle">
                 <a-row :gutter="[25,25]">
-                  <a-col :span="12"> <img :src="cardimageFront" style="width: 100%" /></a-col>
-                  <a-col :span="12"> <img :src="cardimageBack" style="width: 100%" /></a-col>
+                  <a-col :span="12"> <img :src="cardimageFront" style="width: 50%" /></a-col>
+                  <a-col :span="12"> <img :src="cardimageBack" style="width: 50%" /></a-col>
                 </a-row>
                   <!--a-spin tip="Đang kiểm tra dữ liệu" v-if="isDetectingData" / -->
 				  
@@ -131,7 +131,11 @@
         </a-col>
         <a-col :span="24"  v-if="currentStep === 'failed'">
           <a-card>
-            Lỗi.
+            <div style="text-align:right; margin-top:10px;">
+            <a class="re_ekyc ant-btn ant-btn-warning" @click="reAction" v-if="true" style="margin-top:10px;">
+              Thực hiện lại
+            </a>
+          </div>
           </a-card>
         </a-col>
         <a-col :span="24"  v-if="currentStep === 'complate'">
@@ -318,11 +322,14 @@ export default defineComponent({
     const handleFaceId = (faceImageRef) => {
       console.log(faceImageRef);
       localStorage.setItem("nh_img_faceid", faceImageRef);
+      let data_front = localStorage.getItem("nh_img_front");
+      let data_back = localStorage.getItem("nh_img_back");
       if(faceImageRef){
         isDetectingData.value = true;
         visibleModal.value = false;
-		cardFaceIdTitle.value = "Xác thực khuôn mặt thành công!";
+		    cardFaceIdTitle.value = "Xác thực khuôn mặt thành công!";
         message.info('Xác thực khuôn mặt thành công!');
+        do_upload_ekyc(data_front, data_back, faceImageRef);
       }
       else{
         //currentStep.value = "beginCheckFaceId";
@@ -389,9 +396,9 @@ export default defineComponent({
               .catch(err => console.log('No media devices: ', err));
       }
 		  await delay(1000);
-		  console.log('handleCancelPopup');
+		  console.log('handleCancelPopup', currentStep.value);
 		    //currentStep.value = "beginCheckFaceId";
-        currentStep.value = "cardFront";
+        currentStep.value = "failed";
         isUpload.value = false
         open.value = false
         visibleModal.value = false

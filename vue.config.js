@@ -17,5 +17,6 @@ module.exports = defineConfig({
     //     }
     //   },
     // }
-  }
+  },
+  outputDir: 'dist_ellipse_with_frame'
 })
